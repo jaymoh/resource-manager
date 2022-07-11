@@ -37,12 +37,12 @@ class StorePdfPostRequest extends FormRequest
     public function messages()
     {
         return [
-            'title.required' => 'Please enter a title',
-            'title.string' => 'Title must be a string',
-            'title.max' => 'Title must be less than 255 characters',
-            'pdf_file.required' => 'Please upload a PDF file',
-            'pdf_file.file' => 'PDF file must be a file',
-            'pdf_file.mimes' => 'File must be a PDF file',
+            'title.required' => 'Please enter a title.',
+            'title.string' => 'Title must be a string.',
+            'title.max' => 'Title must be less than 255 characters.',
+            'pdf_file.required' => 'Please upload a PDF file.',
+            'pdf_file.file' => 'PDF file must be a file.',
+            'pdf_file.mimes' => 'File must be a PDF file.',
         ];
     }
 }

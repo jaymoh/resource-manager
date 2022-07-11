@@ -2,6 +2,9 @@
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Models\Post;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\Unit\Http\AbstractHttpTest;
 
 class PostControllerTest extends AbstractHttpTest
@@ -201,5 +204,66 @@ class PostControllerTest extends AbstractHttpTest
 
         $response->assertStatus(404)
             ->assertJsonFragment(["message" => "Post not found"]);
+    }
+
+    /**
+     * test post delete with invalid id should fail
+     */
+    public function testPostDeleteInvalidId()
+    {
+        $route = route('posts.destroy', ['post' => 10000]);
+
+        $response = $this->json('DELETE', $route);
+
+        $response->assertStatus(422)
+            ->assertJsonFragment(["message" => "Post cannot be deleted!"]);
+    }
+
+    /**
+     * Test can store pdf post
+     *
+     * @return void
+     */
+    public function testStorePdfPostSuccess()
+    {
+        $title = 'PDF Post Example.';
+        $pdfFile = UploadedFile::fake()->create('test.pdf');
+
+        $requestBody = [
+            'title' => $title,
+            'pdf_file' => $pdfFile,
+        ];
+
+        $route = route('posts.storePdf');
+
+        $response = $this
+            ->json('POST', $route, $requestBody);
+
+        $post = Post::with('pdfPost')->find($response->json('data.id'));
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.title', $title)
+            ->assertJsonPath('data.relationships.pdf.pdf_path', $post->pdfPost->pdf_path);
+
+        $pdfStoragePath = Post::PDF_STORAGE_PATH . '/' . $response->json('data.relationships.pdf.pdf_path');
+
+        Storage::assertExists($pdfStoragePath);
+    }
+
+    /**
+     * test pdf post store with invalid data should fail
+     */
+    public function testPdfPostStoreInvalid(): void
+    {
+        $requestBody = [];
+
+        // this end point stores and returns the saved model as json
+        $route = route('posts.storePdf');
+
+        $response = $this->json('POST', $route, $requestBody);
+
+        $response
+            ->assertStatus(422)
+            ->assertJson(require __DIR__ . '/responses/posts/posts-pdf-store-invalid-response.php');
     }
 }
