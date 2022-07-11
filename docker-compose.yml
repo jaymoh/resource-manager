@@ -1,0 +1,76 @@
+version: '3.5'
+services:
+    # DB Service
+    db:
+        image: mysql:8.0
+        container_name: resource_db
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "3306"
+        environment:
+            MYSQL_DATABASE: "resource_db"
+            MYSQL_ROOT_PASSWORD: "secret&Jay"
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        volumes:
+            - dbdata:/var/lib/mysql/
+            - ./compose_configs/mysql/my.cnf:/etc/mysql/my.cnf
+            - ./compose_configs/mysql-files:/var/lib/mysql-files
+        networks:
+            - app-network
+
+    # APP Service
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        #image: php:8.1
+        container_name: resource_api
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "8021:8021"
+        depends_on:
+            - db
+        environment:
+            SERVICE_NAME: resource_app_code
+            SERVICE_TAGS: dev
+        working_dir: /var/www/html/
+        volumes:
+            - ./:/var/www/html/
+            - ./compose_configs/php/laravel.ini:/usr/local/etc/php/conf.d/laravel.ini
+            - /var/www/html/vendor
+            - /var/www/html/node_modules
+        networks:
+            - app-network
+
+        # SPA Service
+    frontend:
+        build:
+            context: ./resource_spa
+            dockerfile: Dockerfile
+        image: node:latest
+        container_name: resource_frontend
+        restart: unless-stopped
+        tty: true
+        depends_on:
+            - api
+        ports:
+            - "8020:8020"
+        volumes:
+            - ./resource_spa:/var/www/html/
+            - /var/www/html/node_modules
+            - /var/www/html/dist/spa
+        networks:
+            - app-network
+
+# Docker Networks
+networks:
+    app-network:
+        name: app-network
+        driver: bridge
+#Volumes
+volumes:
+    dbdata:
+        driver: local
