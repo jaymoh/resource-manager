@@ -163,8 +163,8 @@ docker-compose stop api
 docker-compose up -d api
 ```
 
-The app frontend should be accessible on port 8020. Access it at `http://127.0.0.1:8020/`.
-The app backend API should be accessible on port 8021. Access it at `http://127.0.0.1:8021/`.
+The app frontend should be accessible on port **8020**. Access it at `http://127.0.0.1:8020/`.
+The app backend API should be accessible on port **8021**. Access it at `http://127.0.0.1:8021/api/`.
 
 #### Miscellaneous
 If you chose to use a different password and username than the root user, and have defined the details in the `.env` file, 
